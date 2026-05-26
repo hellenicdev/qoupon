@@ -23,8 +23,8 @@ router.post('/login', loginLimiter, async (req, res) => {
   const match = await admin.comparePassword(password);
   if (!match) {
     admin.loginAttempts += 1;
-    if (admin.loginAttempts >= 5) {
-      admin.lockUntil = new Date(Date.now() + 30 * 60 * 1000);
+    if (admin.loginAttempts >= 10) {
+      admin.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
       admin.loginAttempts = 0;
     }
     await admin.save();
@@ -87,6 +87,17 @@ router.post('/create', verifyToken, async (req, res) => {
 router.get('/list', verifyToken, async (req, res) => {
   const admins = await Admin.find().select('email createdAt');
   res.json(admins);
+});
+
+router.post('/unlock', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email required' });
+  const admin = await Admin.findOne({ email: email.toLowerCase() });
+  if (!admin) return res.status(404).json({ error: 'Admin not found' });
+  admin.loginAttempts = 0;
+  admin.lockUntil = null;
+  await admin.save();
+  res.json({ message: 'Account unlocked' });
 });
 
 module.exports = router;
