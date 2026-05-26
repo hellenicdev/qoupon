@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit a Coupon — CouponHub</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">Coupon<span>Hub</span></a>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/coupons.html">All Coupons</a>
+      <a href="/submit.html" class="active">Submit Coupon</a>
+    </nav>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="form-card">
+      <h2>Submit a Coupon</h2>
+      <p style="color:var(--gray-500);margin-bottom:20px;">Found a great deal? Share it with everyone. We'll review and publish it.</p>
+
+      <div id="successMsg" class="success-message"></div>
+      <div id="errorMsg" class="error-message"></div>
+
+      <form id="submitForm">
+        <div class="form-group">
+          <label for="store">Store Name *</label>
+          <input type="text" id="store" required>
+        </div>
+        <div class="form-group">
+          <label for="code">Coupon Code *</label>
+          <input type="text" id="code" required>
+        </div>
+        <div class="form-group">
+          <label for="discount">Discount *</label>
+          <input type="text" id="discount" placeholder="e.g. 20% OFF, $10 off" required>
+        </div>
+        <div class="form-group">
+          <label for="category">Category</label>
+          <input type="text" id="category" placeholder="e.g. Fashion, Electronics">
+        </div>
+        <div class="form-group">
+          <label for="url">Store URL</label>
+          <input type="url" id="url" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label for="expiry">Expiry Date</label>
+          <input type="date" id="expiry">
+        </div>
+        <div class="form-group">
+          <label for="desc">Description</label>
+          <textarea id="desc" rows="3" placeholder="Terms and conditions..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Submit for Review</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div class="ad-block ad-leaderboard">Ad — Leaderboard 728×90</div>
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 CouponHub. All deals are for informational purposes.</p>
+  </div>
+</footer>
+
+<script>
+  window.API_BASE = 'http://localhost:3000/api';
+</script>
+<script src="js/api.js"></script>
+<script>
+  document.getElementById('submitForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const success = document.getElementById('successMsg');
+    const error = document.getElementById('errorMsg');
+    success.style.display = 'none';
+    error.style.display = 'none';
+
+    try {
+      await SubmissionAPI.submit({
+        store: document.getElementById('store').value,
+        code: document.getElementById('code').value,
+        discount: document.getElementById('discount').value,
+        category: document.getElementById('category').value || undefined,
+        url: document.getElementById('url').value || undefined,
+        expiryDate: document.getElementById('expiry').value || undefined,
+        description: document.getElementById('desc').value || undefined
+      });
+      success.textContent = 'Coupon submitted! It will appear after review.';
+      success.style.display = 'block';
+      document.getElementById('submitForm').reset();
+
+      AnalyticsAPI.track({ type: 'submission' }).catch(() => {});
+    } catch (err) {
+      error.textContent = err.message;
+      error.style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>

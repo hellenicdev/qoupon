@@ -1,0 +1,21 @@
+function sanitize(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+function sanitizeBody(req, res, next) {
+  if (req.body) {
+    for (const key of Object.keys(req.body)) {
+      if (typeof req.body[key] === 'string') {
+        req.body[key] = sanitize(req.body[key]);
+      }
+    }
+  }
+  next();
+}
+
+module.exports = sanitizeBody;
