@@ -57,6 +57,7 @@ document.querySelectorAll('.sidebar-nav a[data-page]').forEach(a => {
     if (a.dataset.page === 'coupons') loadCoupons();
     if (a.dataset.page === 'submissions') loadSubmissions();
     if (a.dataset.page === 'analytics') loadAnalytics();
+    if (a.dataset.page === 'admins') loadAdmins();
   });
 });
 
@@ -235,6 +236,55 @@ async function loadAnalytics() {
     });
   } catch {}
 }
+
+// ─── Admin management ───
+async function loadAdmins() {
+  try {
+    const res = await fetch(`${API}/admin/list`, { credentials: 'include' });
+    const data = await res.json();
+    const tbody = document.getElementById('adminsTable');
+    tbody.innerHTML = (data || []).map(a =>
+      `<tr><td>${a.email}</td><td>${new Date(a.createdAt).toLocaleDateString()}</td></tr>`
+    ).join('');
+  } catch {}
+}
+
+function showAdminForm() {
+  document.getElementById('adminForm').reset();
+  document.getElementById('adminError').style.display = 'none';
+  document.getElementById('adminSuccess').style.display = 'none';
+  document.getElementById('adminFormModal').style.display = 'flex';
+}
+
+function hideAdminForm() {
+  document.getElementById('adminFormModal').style.display = 'none';
+}
+
+document.getElementById('adminForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const errEl = document.getElementById('adminError');
+  const sucEl = document.getElementById('adminSuccess');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+  try {
+    const res = await fetch(`${API}/admin/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        email: document.getElementById('af_email').value,
+        password: document.getElementById('af_password').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    hideAdminForm();
+    loadAdmins();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  }
+});
 
 // ─── Init ───
 checkAuth();

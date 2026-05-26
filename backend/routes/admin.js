@@ -68,4 +68,25 @@ router.get('/setup', async (req, res) => {
   res.json({ message: 'Admin created. Change credentials immediately.' });
 });
 
+router.post('/create', verifyToken, async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
+  const existing = await Admin.findOne({ email: email.toLowerCase() });
+  if (existing) {
+    return res.status(409).json({ error: 'Admin with this email already exists' });
+  }
+  await Admin.create({ email, password });
+  res.status(201).json({ message: 'Admin created' });
+});
+
+router.get('/list', verifyToken, async (req, res) => {
+  const admins = await Admin.find().select('email createdAt');
+  res.json(admins);
+});
+
 module.exports = router;
