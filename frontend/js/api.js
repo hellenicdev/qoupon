@@ -1,4 +1,4 @@
-const API_BASE = window.API_BASE || 'http://localhost:3000/api';
+const API_BASE = window.API_BASE || 'https://qoupon.onrender.com/api';
 
 async function api(path, options = {}) {
   const url = `${API_BASE}${path}`;
